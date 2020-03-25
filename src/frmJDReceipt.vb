@@ -17,7 +17,7 @@ Public Class frmJDReceipt
     End Sub
 
     Private Sub axWbNewWindow2EventHandler(ByRef ppDisp As Object, ByRef Cancel As Boolean)
-        '打开新窗口的操作定向到指定的 WebBrowser
+        'Navigate to the specified WebBrowser when open new window
         ppDisp = wb2.ActiveXInstance
     End Sub
 
@@ -30,15 +30,13 @@ Public Class frmJDReceipt
     Private Sub wbDocumentCompletedEventHandler(sender As Object, e As WebBrowserDocumentCompletedEventArgs)
         Dim browser As WebBrowser = CType(sender, WebBrowser)
 
-        'Const WDFP_URL As String = "https://myivc.jd.com/fpzz/index.action"
         Const FPXQ_URL As String = "https://myivc.jd.com/fpzz/ivcLand.action?orderId="
-        'Const CKFP_URL As String = "https://storage.jd.com/eicore-fm.jd.com/"
         Const HKFP_URL As String = "https://myivc.jd.com/fpzz/hkfpReq.action"
 
         Dim url As String = e.Url.ToString
         Dim doc As HtmlDocument = browser.Document
         If url.StartsWith(FPXQ_URL) Then
-            '下载发票
+            'download receipt file
             _currElemet = getCKFPElement(doc)
             If _currElemet IsNot Nothing Then
                 url = _currElemet.GetAttribute("href")
@@ -49,7 +47,7 @@ Public Class frmJDReceipt
 
             If _fpxq IsNot Nothing Then
                 If _fpxq.Count > 0 Then
-                    '继续
+                    'TODO: coutinue
                     'If MessageBox.Show("continue to next?", Me.Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Question) = DialogResult.OK Then
                     url = _fpxq.Dequeue
                     _currElemet = findElement(wb.Document, url, "发票详情")
@@ -67,7 +65,7 @@ Public Class frmJDReceipt
                 End If
             End If
         ElseIf url.StartsWith(HKFP_URL) Then
-            '换开发票：填写表单并自动提交
+            'Change title：fill form and submit
             'ivcTitleType.value="5"
             browser.BringToFront()
             btnDetailPage.Checked = True
@@ -97,7 +95,7 @@ Public Class frmJDReceipt
     End Sub
 
     ''' <summary>
-    ''' 发票详情 Url 队列
+    ''' Url queue of receipt detail
     ''' </summary>
     Private _fpxq As Queue(Of String)
 
@@ -127,7 +125,7 @@ Public Class frmJDReceipt
     End Sub
 
     ''' <summary>
-    ''' 下载保存文件
+    ''' download file
     ''' </summary>
     ''' <param name="url"></param>
     Private Shared Sub saveFile(ByVal url As String, doc As HtmlDocument)
@@ -146,10 +144,10 @@ Public Class frmJDReceipt
     End Sub
 
     ''' <summary>
-    ''' 通过 Url 截取文件名
+    '''  get file name form Url
     ''' </summary>
     ''' <param name="url"></param>
-    ''' <param name="ext">扩展名， 默认为 .pdf</param>
+    ''' <param name="ext">extend file name, .pdf as default </param>
     ''' <returns></returns>
     ''' <example> 
     ''' url = https://storage.jd.com/eicore-fm.jd.com/012001900311-54851690.pdf?Expires=2529543048&AccessKey=bfac05320eaf11cc80cf1823e4fb87d98523fc94&Signature=ezQY7fu9DNVPArELUFpXbOqjOu8%3D
@@ -239,10 +237,9 @@ Public Class frmJDReceipt
     End Function
 
     Private Sub btnChangeTitle_Click(sender As Object, e As EventArgs) Handles btnChangeTitle.Click
-        'Todo: 自动填写换开表单并提交
         btnChangeTitle.Checked = Not btnChangeTitle.Checked
         If btnChangeTitle.Checked Then
-            '填写换开抬头后税号
+            'fill tax code
             Dim sInput As String = Nothing
             sInput = InputBox("The receipt title change to:", Me.Text, My.Settings.ReceiptTitle)
             If Not String.IsNullOrEmpty(sInput) Then
